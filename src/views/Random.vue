@@ -248,14 +248,12 @@ onBeforeUnmount(() => {
 }
 
 .video-container {
-    max-width: 800px;
+    max-width: 53%;
     border-radius: 8px;
     overflow: hidden;
 }
 
 .responsive-video {
-    max-width: 100vw;
-    max-height: 95vh;
     width: auto;
     height: auto;
 }
@@ -265,6 +263,10 @@ onBeforeUnmount(() => {
     height: 100%;
     width: 100%;
     background: #353535;
+}
+.video-overlay video{
+    width: 100%;
+    height: 100%;
 }
 
 .play-icon {
