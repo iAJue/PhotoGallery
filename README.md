@@ -7,6 +7,10 @@
 ## 预览
 https://photo.moejue.cn
 
+![image](./public/images/1.png)
+![image](./public/images/2.png)
+![image](./public/images/3.png)
+
 
 ## 特性
 
@@ -45,8 +49,8 @@ https://photo.moejue.cn
 
 
 ## 后端接口
-    仅供参考
-    https://github.com/iAJue/wasteCode/tree/main/photo
+仅供参考
+https://github.com/iAJue/wasteCode/tree/main/photo
 
 
 ## 返回数据格式
