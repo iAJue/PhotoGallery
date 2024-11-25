@@ -13,6 +13,7 @@
             <i class="fas fa-ellipsis-h"></i>
             <div v-if="showDropdown" class="dropdown-menu">
                 <a href="https://github.com/iAJue/PhotoGallery" target="_blank"><i class="fab fa-github"></i> GitHub</a>
+                <a href="https://jq.qq.com/?_wv=1027&k=5cvR0GN" target="_blank"><i class="fas fa-users"></i> 社区官群</a>
                 <a href="http://moejue.cn/" target="_blank"><i class="fas fa-blog"></i> 博客</a>
                 <div @click="toggleAboutModal"><i class="fas fa-info-circle"></i> 关于</div>
             </div>

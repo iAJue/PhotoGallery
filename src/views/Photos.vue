@@ -20,6 +20,12 @@
             </div>
         </div>
 
+
+        <!-- 加载更多按钮 -->
+        <div class="load-more" v-if="!loading && hasMore">
+            <button @click="loadMore">加载更多 <i class="fas fa-chevron-down"></i></button>
+        </div>
+
         <div v-if="currentVideo" class="video-modal" @click.self="closeMedia">
             <div class="video-container">
                 <video ref="videoPlayer" class="plyr responsive-video">
@@ -75,7 +81,7 @@ const videoPlayer = ref(null);
 const currentSrcIndex = ref(0); 
 const searchQuery = ref("");
 const limit = ref(12); 
-
+const hasMore = ref(true);
 
 
 watch(currentVideo, async () => {
@@ -135,9 +141,10 @@ async function fetchPhotos(page) {
             alert(data.error);
             return;
         }
-        if(data.length == 0) {
-            window.removeEventListener('scroll', handleScroll);
-            return
+        // 如果没有更多数据
+        if (data.length === 0) {
+            hasMore.value = false; // 设置为无更多数据
+            return;
         }
         showPasswordPrompt.value = false;
         const newPhotos = data.map(group => ({
@@ -156,14 +163,11 @@ async function fetchPhotos(page) {
         loading.value = false;
     }
 }
-function handleScroll() {
-    const scrollTop = window.scrollY;
-    const windowHeight = window.innerHeight;
-    const documentHeight = document.documentElement.scrollHeight;
-
-    if (scrollTop + windowHeight >= documentHeight - 10 && !loading.value) {
-        page.value += 1;
-        fetchPhotos(page.value);
+// 加载更多方法
+function loadMore() {
+    if (!loading.value && hasMore.value) {
+        page.value += 1; // 增加页码
+        fetchPhotos(page.value); // 加载下一页数据
     }
 }
 
@@ -215,7 +219,6 @@ function formatDuration(duration) {
 function submitPassword() {
     if (password.value) {
         fetchPhotos(page.value);
-        window.addEventListener('scroll', handleScroll);
     } else {
         alert('请输入密码');
     }
@@ -240,6 +243,7 @@ function setLimitBasedOnScreenSize() {
         limit.value = 10; // 小屏幕
     }
 }
+// 移除滚动事件监听
 onMounted(() => {
     const folderParam = route.query.folder_id;
     const isPassword = route.query.ispassword === 'true';
@@ -252,14 +256,9 @@ onMounted(() => {
         showPasswordPrompt.value = true;
     } else {
         fetchPhotos(page.value);
-        window.addEventListener('scroll', handleScroll);
     }
-
 });
 
-onBeforeUnmount(() => {
-    window.removeEventListener('scroll', handleScroll);
-});
 
 </script>
 
@@ -476,5 +475,31 @@ onBeforeUnmount(() => {
 .video-thumbnail video{
     width: 100%;
     height: 100%;
+}
+
+.load-more {
+    display: flex;
+    justify-content: center;
+    margin-top: 16px;
+}
+
+.load-more button {
+    padding: 7px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.load-more button:hover {
+    background-color: #0056b3;
+}
+
+.load-more button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
 }
 </style>
