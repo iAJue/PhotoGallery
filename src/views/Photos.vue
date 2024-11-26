@@ -27,11 +27,7 @@
         </div>
 
         <div v-if="currentVideo" class="video-modal" @click.self="closeMedia">
-            <div class="video-container">
-                <video ref="videoPlayer" class="plyr responsive-video">
-                    <source v-for="(src, index) in currentVideo.src" :key="index" :src="src" type="video/mp4" />
-                </video>
-            </div>
+            <div class="dplayer-container"></div>
         </div>
 
         <!-- 图片预览模态框 -->
@@ -63,8 +59,7 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount, onUnmounted, watch, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
-import Plyr from 'plyr';
-import 'plyr/dist/plyr.css';
+import DPlayer from 'dplayer';
 const route = useRoute();
 const folderId = ref(null);
 const isPasswordRequired = ref(false);
@@ -82,24 +77,47 @@ const currentSrcIndex = ref(0);
 const searchQuery = ref("");
 const limit = ref(12); 
 const hasMore = ref(true);
-
+const dplayerInstance = ref(null);
 
 watch(currentVideo, async () => {
     if (currentVideo.value && currentVideo.value.isVideo) {
-        await nextTick(); 
-        plyrInstance.value = new Plyr(videoPlayer.value, {
-            controls: ['play', 'progress', 'volume', 'fullscreen'],
-            autoplay: true,
-        });
-        preloadNextSegment();
-        plyrInstance.value.on('ended', handleVideoEnd);
+        await nextTick();
+        initializeDPlayer();
     }
 });
+
+function initializeDPlayer() {
+    if (dplayerInstance.value) {
+        dplayerInstance.value.destroy();
+    }
+
+    dplayerInstance.value = new DPlayer({
+        container: document.querySelector('.dplayer-container'),
+        video: {
+            url: currentVideo.value.src[currentSrcIndex.value],
+        },
+        autoplay: true,
+    });
+
+    // 监听时间更新事件，提前加载下一个片段
+    dplayerInstance.value.on('timeupdate', () => {
+        const currentTime = dplayerInstance.value.video.currentTime;
+        const duration = dplayerInstance.value.video.duration;
+
+        // 如果播放接近尾声，预加载下一段
+        if (duration - currentTime < 5) {
+            preloadNextSegment();
+        }
+    });
+
+    // 监听播放结束事件，切换到下一段
+    dplayerInstance.value.on('ended', handleVideoEnd);
+}
 function preloadNextSegment() {
     if (Array.isArray(currentVideo.value.src) && currentSrcIndex.value < currentVideo.value.src.length - 1) {
         const nextSegment = document.createElement('video');
         nextSegment.src = currentVideo.value.src[currentSrcIndex.value + 1];
-        nextSegment.preload = 'auto'; 
+        nextSegment.preload = 'auto'; // 提前预加载下一段
     }
 }
 onUnmounted(() => {
@@ -108,28 +126,26 @@ onUnmounted(() => {
     }
 });
 function handleVideoEnd() {
+    // 如果还有下一段视频
     if (Array.isArray(currentVideo.value.src) && currentSrcIndex.value < currentVideo.value.src.length - 1) {
-        currentSrcIndex.value += 1;
-        plyrInstance.value.source = {
-            type: 'video',
-            sources: [
-                { src: currentVideo.value.src[currentSrcIndex.value], type: 'video/mp4' },
-            ],
-        };
-        plyrInstance.value.play();
-        preloadNextSegment(); 
+        currentSrcIndex.value += 1; // 切换到下一个地址
+        dplayerInstance.value.switchVideo({
+            url: currentVideo.value.src[currentSrcIndex.value],
+        });
+        dplayerInstance.value.play(); // 自动播放下一段视频
     } else {
-        currentSrcIndex.value = 0; 
+        // 如果所有片段播放完毕
+        currentSrcIndex.value = 0; // 重置索引
+        dplayerInstance.value.pause(); // 暂停播放器（如果需要）
     }
 }
+
 function closeMedia() {
-    if (plyrInstance.value) {
-        plyrInstance.value.destroy(); 
+    if (dplayerInstance.value) {
+        dplayerInstance.value.destroy();
     }
-    currentVideo.value = null; 
-    if (currentVideo.value && currentVideo.value.isVideo) {
-        currentSrcIndex.value = 0; 
-    }
+    currentVideo.value = null;
+    currentSrcIndex.value = 0;
 }
 async function fetchPhotos(page) {
     loading.value = true;
@@ -141,9 +157,8 @@ async function fetchPhotos(page) {
             alert(data.error);
             return;
         }
-        // 如果没有更多数据
         if (data.length === 0) {
-            hasMore.value = false; // 设置为无更多数据
+            hasMore.value = false;
             return;
         }
         showPasswordPrompt.value = false;
@@ -153,8 +168,9 @@ async function fetchPhotos(page) {
                 src: item.isVideo ? item.src.split('\n') : item.src,
                 alt: item.alt,
                 isVideo: item.isVideo || false,
-                duration: item.duration || null
-            }))
+                duration: item.duration || null,
+                thumbnail: item.thumbnail || null,
+            })),
         }));
         groupedPhotos.value = [...groupedPhotos.value, ...newPhotos];
     } catch (error) {
@@ -263,6 +279,26 @@ onMounted(() => {
 </script>
 
 <style scoped>
+
+.video-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.dplayer-container {
+    width: 80%;
+    height: 60%;
+    border-radius: 8px;
+    overflow: hidden;
+}
 .gallery {
     padding: 16px;
 }
