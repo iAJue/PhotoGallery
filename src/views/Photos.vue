@@ -192,7 +192,7 @@ function playVideo(photo) {
 
 function previewImage(photo, index) {
     currentImage.value = photo;
-    currentIndex.value = index;
+    currentIndex.value = groupedPhotos.value.flatMap(group => group.items).findIndex(item => item.src === photo.src);
 }
 
 function closeImage() {
@@ -202,19 +202,27 @@ function closeImage() {
 
 function nextImage() {
     if (currentIndex.value !== null) {
-        const nextIndex = (currentIndex.value + 1) % groupedPhotos.value.flatMap(group => group.items).length;
-        const allPhotos = groupedPhotos.value.flatMap(group => group.items);
-        currentImage.value = allPhotos[nextIndex];
-        currentIndex.value = nextIndex;
+        const allItems = groupedPhotos.value.flatMap(group => group.items); // 展平所有图片和视频
+        let nextIndex = (currentIndex.value + 1) % allItems.length; // 计算下一项索引
+        // 跳过视频
+        while (allItems[nextIndex].isVideo) {
+            nextIndex = (nextIndex + 1) % allItems.length;
+        }
+        currentIndex.value = nextIndex; // 更新索引
+        currentImage.value = allItems[currentIndex.value]; // 更新当前图片
     }
 }
 
 function previousImage() {
     if (currentIndex.value !== null) {
-        const allPhotos = groupedPhotos.value.flatMap(group => group.items);
-        const prevIndex = (currentIndex.value - 1 + allPhotos.length) % allPhotos.length;
-        currentImage.value = allPhotos[prevIndex];
-        currentIndex.value = prevIndex;
+        const allItems = groupedPhotos.value.flatMap(group => group.items); // 展平所有图片和视频
+        let prevIndex = (currentIndex.value - 1 + allItems.length) % allItems.length; // 计算上一项索引
+        // 跳过视频
+        while (allItems[prevIndex].isVideo) {
+            prevIndex = (prevIndex - 1 + allItems.length) % allItems.length;
+        }
+        currentIndex.value = prevIndex; // 更新索引
+        currentImage.value = allItems[currentIndex.value]; // 更新当前图片
     }
 }
 

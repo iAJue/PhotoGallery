@@ -2,7 +2,7 @@
     <div class="">
         <div class="gallery random">
             <div class="photo-item" v-for="(randomItem, index) in randomItems" :key="index"
-                @click="handleItemClick(randomItem)">
+                @click="handleItemClick(randomItem, index)">
                 <img :src="randomItem.src" :alt="randomItem.alt" v-if="!randomItem.isVideo" />
                 <div v-else class="video-overlay">
                     <div class="play-icon"><i class="fa-solid fa-play"></i></div>
@@ -15,12 +15,25 @@
                 <div class="skeleton-img"></div>
             </div>
         </div>
-        <!-- 图片和视频预览模态框 -->
-        <div v-if="currentMedia" class="media-modal" @click.self="closeMedia">
-            <div v-if="currentMedia.isVideo" class="video-modal" @click.self="closeMedia">
-                <div class="dplayer-container"></div>
-            </div>
-            <img v-else :src="currentMedia.src" :alt="currentMedia.alt" />
+
+        <!-- 图片预览模态框 -->
+        <div v-if="currentImage" class="image-modal">
+            <img :src="currentImage.src" :alt="currentImage.alt" @swipeleft="nextImage" @swiperight="previousImage" />
+
+            <!-- 左右导航按钮 -->
+            <button class="nav-button left" @click.stop="previousImage">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="nav-button right" @click.stop="nextImage">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+
+            <span class="close-icon" @click="closeImage">✖</span>
+        </div>
+
+        <!-- 视频预览模态框 -->
+        <div v-if="currentMedia && currentMedia.isVideo" class="video-modal" @click.self="closeMedia">
+            <div class="dplayer-container"></div>
         </div>
 
         <!-- 加载更多按钮 -->
@@ -28,8 +41,8 @@
             <button @click="loadMoreItems">加载更多 <i class="fas fa-chevron-down"></i></button>
         </div>
     </div>
-
 </template>
+
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue';
@@ -42,7 +55,45 @@ const currentMedia = ref(null); // 当前预览的图片或视频
 const dplayerInstance = ref(null); // DPlayer 实例
 const limit = ref(12);
 const currentSrcIndex = ref(0); // 用于跟踪当前播放的分段索引
+const currentImage = ref(null); // 当前预览的图片
+const currentIndex = ref(null); // 当前图片索引
+function handleItemClick(item, index) {
+    if (!item.isVideo) {
+        currentImage.value = item;
+        currentIndex.value = index;
+    } else {
+        currentMedia.value = item;
+        currentSrcIndex.value = 0;
+        nextTick(() => initDPlayer());
+    }
+}
 
+function closeImage() {
+    currentImage.value = null;
+    currentIndex.value = null;
+}
+
+function nextImage() {
+    if (currentIndex.value !== null) {
+        let nextIndex = (currentIndex.value + 1) % randomItems.value.length;
+        while (randomItems.value[nextIndex].isVideo) {
+            nextIndex = (nextIndex + 1) % randomItems.value.length; // 跳过视频，循环查找下一张图片
+        }
+        currentIndex.value = nextIndex;
+        currentImage.value = randomItems.value[currentIndex.value];
+    }
+}
+
+function previousImage() {
+    if (currentIndex.value !== null) {
+        let prevIndex = (currentIndex.value - 1 + randomItems.value.length) % randomItems.value.length;
+        while (randomItems.value[prevIndex].isVideo) {
+            prevIndex = (prevIndex - 1 + randomItems.value.length) % randomItems.value.length; // 跳过视频，循环查找上一张图片
+        }
+        currentIndex.value = prevIndex;
+        currentImage.value = randomItems.value[currentIndex.value];
+    }
+}
 // 初始化 DPlayer
 function initDPlayer() {
     if (dplayerInstance.value) {
@@ -65,6 +116,11 @@ function initDPlayer() {
 
 // 监听播放时间更新
 function handleTimeUpdate() {
+    if (!dplayerInstance.value || !dplayerInstance.value.video) {
+        console.warn('播放器实例不存在或已销毁');
+        return;
+    }
+
     const currentTime = dplayerInstance.value.video.currentTime;
     const duration = dplayerInstance.value.video.duration;
 
@@ -112,17 +168,12 @@ function switchToNextSegment() {
     console.log(`切换到新的视频分段：${nextSegmentUrl}`);
 }
 
-// 处理点击图片或视频的事件
-function handleItemClick(item) {
-    currentMedia.value = item;
-    currentSrcIndex.value = 0; // 点击时重置分段索引
-    nextTick(() => initDPlayer()); // 初始化播放器
-}
 
 // 关闭媒体预览模态框
 function closeMedia() {
     if (dplayerInstance.value) {
-        dplayerInstance.value.destroy();
+        dplayerInstance.value.destroy(); // 销毁播放器实例
+        dplayerInstance.value = null; // 确保不会再访问销毁的实例
     }
     currentMedia.value = null;
     currentSrcIndex.value = 0;
@@ -178,7 +229,8 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
     if (dplayerInstance.value) {
-        dplayerInstance.value.destroy();
+        dplayerInstance.value.destroy(); // 销毁播放器实例
+        dplayerInstance.value = null;
     }
 });
 </script>
@@ -196,6 +248,7 @@ onBeforeUnmount(() => {
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    background: rgba(0, 0, 0, 0.8);
 }
 
 .dplayer-container {
@@ -354,5 +407,58 @@ onBeforeUnmount(() => {
 .load-more button:disabled {
     background-color: #cccccc;
     cursor: not-allowed;
+}
+
+/* 图片预览模态框样式 */
+.image-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.image-modal img {
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 8px;
+}
+
+/* 导航按钮 */
+.nav-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: none;
+    font-size: 24px;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+}
+
+.nav-button.left {
+    left: 20px;
+}
+
+.nav-button.right {
+    right: 20px;
+}
+
+.close-icon {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    color: white;
+    cursor: pointer;
 }
 </style>
