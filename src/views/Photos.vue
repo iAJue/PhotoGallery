@@ -20,7 +20,6 @@
             </div>
         </div>
 
-
         <!-- 加载更多按钮 -->
         <div class="load-more" v-if="!loading && hasMore">
             <button @click="loadMore">加载更多 <i class="fas fa-chevron-down"></i></button>
@@ -57,12 +56,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, onUnmounted, watch, nextTick } from 'vue';
+import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 import DPlayer from 'dplayer';
 const route = useRoute();
 const folderId = ref(null);
-const isPasswordRequired = ref(false);
 const showPasswordPrompt = ref(false);
 const password = ref("");
 const groupedPhotos = ref([]);
@@ -72,7 +70,6 @@ const currentIndex = ref(null);
 const loading = ref(false);
 const page = ref(1); 
 const plyrInstance = ref(null); 
-const videoPlayer = ref(null);
 const currentSrcIndex = ref(0); 
 const searchQuery = ref("");
 const limit = ref(12); 
@@ -105,7 +102,7 @@ function initializeDPlayer() {
         const duration = dplayerInstance.value.video.duration;
 
         // 如果播放接近尾声，预加载下一段
-        if (duration - currentTime < 5) {
+        if (duration - currentTime < 20) {
             preloadNextSegment();
         }
     });
@@ -259,7 +256,6 @@ function setLimitBasedOnScreenSize() {
         limit.value = 10; // 小屏幕
     }
 }
-// 移除滚动事件监听
 onMounted(() => {
     const folderParam = route.query.folder_id;
     const isPassword = route.query.ispassword === 'true';
