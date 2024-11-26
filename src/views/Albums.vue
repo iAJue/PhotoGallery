@@ -10,7 +10,7 @@
             </div>
             <div class="album-info">
                 <div class="album-title">{{ album.title }}</div>
-                <div class="album-count">{{ album.count }} 张照片</div>
+                <div class="album-count">{{ album.count }} {{ isImage(album.cover) ? '张照片' : '个视频' }}</div>
             </div>
         </div>
 
