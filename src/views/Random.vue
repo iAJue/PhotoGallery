@@ -10,10 +10,10 @@
                     <div class="video-duration">{{ randomItem.duration }}</div>
                 </div>
             </div>
-        </div>
-        <!-- 骨架屏：加载中 -->
-        <div v-if="loading" class="photo-item skeleton">
-            <div class="skeleton-img"></div>
+            <!-- 骨架屏：加载中 -->
+            <div v-if="loading" class="photo-item skeleton">
+                <div class="skeleton-img"></div>
+            </div>
         </div>
         <!-- 图片和视频预览模态框 -->
         <div v-if="currentMedia" class="media-modal" @click.self="closeMedia">
