@@ -12,6 +12,10 @@
             @mouseleave="showDropdown = false">
             <i class="fas fa-ellipsis-h"></i>
             <div v-if="showDropdown" class="dropdown-menu">
+                <div @click="$emit('toggle-dark-mode')">
+                    <i :class="isDarkMode ? 'fas fa-sun' : 'fas fa-moon'"></i>
+                    {{ isDarkMode ? '浅色模式' : '深色模式' }}
+                </div>
                 <a href="https://github.com/iAJue/PhotoGallery" target="_blank"><i class="fab fa-github"></i> GitHub</a>
                 <a href="https://jq.qq.com/?_wv=1027&k=5cvR0GN" target="_blank"><i class="fas fa-users"></i> 社区官群</a>
                 <a href="http://moejue.cn/" target="_blank"><i class="fas fa-blog"></i> 博客</a>
@@ -37,6 +41,12 @@
 <script setup>
 import { ref, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
+
+// 添加 props 定义
+defineProps({
+    isDarkMode: Boolean
+});
+
 const searchQuery = ref(''); 
 const router = useRouter();
 const showSearchModal = ref(false);

@@ -1,0 +1,115 @@
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f1f5f9;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --border-color: rgba(0, 0, 0, 0.1);
+  --shadow-color: rgba(0, 0, 0, 0.08);
+  --header-bg: rgba(255, 255, 255, 0.98);
+  --modal-bg: #ffffff;
+  --skeleton-start: #e0e0e0;
+  --skeleton-end: #c0c0c0;
+}
+
+.dark-mode {
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #2d2d2d;
+  --text-primary: #ffffff;
+  --text-secondary: #a0aec0;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --shadow-color: rgba(255, 255, 255, 0.08);
+  --header-bg: rgba(26, 26, 26, 0.98);
+  --modal-bg: #2d2d2d;
+  --skeleton-start: #2d2d2d;
+  --skeleton-end: #3d3d3d;
+}
+
+/* Header 样式 */
+.dark-mode .header {
+  background: var(--header-bg);
+  box-shadow: 0 1px 3px var(--border-color);
+}
+
+.dark-mode .search-icon,
+.dark-mode .more-icon {
+  color: var(--text-primary);
+}
+
+.dark-mode .tab {
+  color: var(--text-secondary);
+}
+
+.dark-mode .dropdown-menu {
+  background: var(--bg-secondary);
+}
+
+.dark-mode .dropdown-menu a,
+.dark-mode .dropdown-menu div {
+  color: var(--text-primary);
+}
+
+/* 相册样式 */
+.dark-mode .album {
+  background: var(--bg-secondary);
+  box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+.dark-mode .album-title {
+  color: var(--text-primary);
+}
+
+.dark-mode .album-count {
+  color: var(--text-secondary);
+}
+
+/* 照片样式 */
+.dark-mode .date-group h3 {
+  color: var(--text-secondary);
+}
+
+.dark-mode .photo-item {
+  box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+/* 模态框样式 */
+.dark-mode .password-modal,
+.dark-mode .about-content {
+  background: var(--modal-bg);
+  color: var(--text-primary);
+}
+
+.dark-mode .password-modal input {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+/* 骨架屏样式 */
+.dark-mode .skeleton {
+  background: var(--skeleton-start);
+}
+
+.dark-mode .skeleton-img {
+  background: var(--skeleton-end);
+}
+
+@keyframes dark-skeleton-loading {
+  0% { background-color: var(--skeleton-start); }
+  50% { background-color: var(--skeleton-end); }
+  100% { background-color: var(--skeleton-start); }
+}
+
+.dark-mode .skeleton-img {
+  animation: dark-skeleton-loading 1.5s infinite;
+}
+
+.dark-mode .container,
+.dark-mode .gallery {
+  background-color: var(--bg-secondary);
+}
+
+.dark-mode .gallery.random,
+.dark-mode .gallery.albums,
+.dark-mode .gallery.photos {
+  background-color: var(--bg-secondary);
+} 

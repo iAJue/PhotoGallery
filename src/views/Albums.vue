@@ -1,28 +1,36 @@
 <template>
     <div class="gallery albums">
-        <div class="album" v-for="(album, index) in albums" :key="index" @click="handleAlbumClick(album)">
-            <div class="album-cover">
-                <div v-if="album.attribute != 0" class="blur-overlay"><i class="fa-solid fa-eye-slash"></i> 限制级</div>
-                <img :src="album.cover" :alt="album.title" v-if="isImage(album.cover)" />
-                <div v-else class="video-overlay">
-                    <div class="play-icon"><i class="fa-solid fa-play"></i></div>
+        <!-- 骨架屏 -->
+        <template v-if="loading">
+            <div v-for="i in 12" :key="i" class="album skeleton">
+                <div class="album-cover">
+                    <div class="skeleton-img"></div>
+                </div>
+                <div class="album-info">
+                    <div class="skeleton-text"></div>
+                    <div class="skeleton-text" style="width: 60%"></div>
                 </div>
             </div>
-            <div class="album-info">
-                <div class="album-title">{{ album.title }}</div>
-                <div class="album-count">{{ album.count }} {{ isImage(album.cover) ? '张照片' : '个视频' }}</div>
-            </div>
-        </div>
+        </template>
 
-        <!-- 骨架屏：加载更多 -->
-        <div v-if="loading" class="skeleton album">
-            <div class="album-cover skeleton-img"></div>
-            <div class="album-info">
-                <div class="album-title skeleton-text"></div>
-                <div class="album-count skeleton-text"></div>
+        <!-- 实际内容 -->
+        <template v-else>
+            <div class="album" v-for="(album, index) in albums" :key="index" @click="handleAlbumClick(album)">
+                <div class="album-cover">
+                    <div v-if="album.attribute != 0" class="blur-overlay"><i class="fa-solid fa-eye-slash"></i> 限制级</div>
+                    <img :src="album.cover" :alt="album.title" v-if="isImage(album.cover)" />
+                    <div v-else class="video-overlay">
+                        <div class="play-icon"><i class="fa-solid fa-play"></i></div>
+                    </div>
+                </div>
+                <div class="album-info">
+                    <div class="album-title">{{ album.title }}</div>
+                    <div class="album-count">{{ album.count }} {{ isImage(album.cover) ? '张照片' : '个视频' }}</div>
+                </div>
             </div>
-        </div>
-        <!-- 18+ 确认提示框 -->
+        </template>
+
+        <!-- 警告对话框 -->
         <div v-if="showWarningDialog" class="warning-dialog">
             <div class="dialog-content">
                 <h2>18+ 内容警告</h2>
@@ -45,19 +53,14 @@ const selectedFolder = ref(null);
 const router = useRouter();
 const albums = ref([]);
 const loading = ref(false);
-const page = ref(1);
 
-async function fetchAlbums(page) {
+async function fetchAlbums() {
     loading.value = true;
     try {
-        const response = await fetch(`https://photo.moejue.cn/api/?action=albums&page=${page}&limit=10`);
+        const response = await fetch(`https://photo.moejue.cn/api/?action=albums`);
         if (!response.ok) throw new Error('网络请求失败');
 
         const data = await response.json();
-        if(data.length == 0) {
-            window.removeEventListener('scroll', handleScroll);
-            return
-        }
         const newAlbums = data.map(album => ({
             cover: album.latest_image,
             title: album.folder_name,
@@ -67,6 +70,7 @@ async function fetchAlbums(page) {
             ispassword: album.ispassword
         }));
 
+        albums.value = newAlbums;
         return newAlbums;
     } catch (error) {
         console.error("获取相册数据失败:", error);
@@ -76,21 +80,6 @@ async function fetchAlbums(page) {
     }
 }
 
-async function loadMoreAlbums() {
-    const newAlbums = await fetchAlbums(page.value);
-    albums.value.push(...newAlbums);
-    page.value += 1; 
-}
-
-function handleScroll() {
-    const scrollTop = window.scrollY;
-    const windowHeight = window.innerHeight;
-    const documentHeight = document.documentElement.scrollHeight;
-
-    if (scrollTop + windowHeight >= documentHeight - 10 && !loading.value) {
-        loadMoreAlbums();
-    }
-}
 function handleAlbumClick(album) {
     if (album.attribute == 2) {
         selectedFolder.value = album;
@@ -116,13 +105,9 @@ function cancelAccess() {
     showWarningDialog.value = false;
 }
 onMounted(() => {
-    loadMoreAlbums(); // 初始加载第一页数据
-    window.addEventListener('scroll', handleScroll);
+    fetchAlbums();
 });
 
-onBeforeUnmount(() => {
-    window.removeEventListener('scroll', handleScroll);
-});
 </script>
 
 <style scoped>
@@ -182,36 +167,40 @@ onBeforeUnmount(() => {
 
 /* 骨架屏样式 */
 .skeleton {
-    background: #e0e0e0;
+    background: var(--bg-secondary);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+.skeleton .album-cover {
+    aspect-ratio: 1;
+    background: var(--skeleton-start);
 }
 
 .skeleton-img {
     width: 100%;
     height: 100%;
-    background: #ccc;
+    background: var(--skeleton-end);
     animation: skeleton-loading 1.5s infinite;
 }
 
+.skeleton .album-info {
+    padding: 16px;
+}
+
 .skeleton-text {
-    background: #ccc;
     height: 14px;
-    margin-top: 10px;
-    width: 80%;
+    background: var(--skeleton-end);
+    margin-bottom: 8px;
+    border-radius: 4px;
     animation: skeleton-loading 1.5s infinite;
 }
 
 @keyframes skeleton-loading {
-    0% {
-        background-color: #e0e0e0;
-    }
-
-    50% {
-        background-color: #c0c0c0;
-    }
-
-    100% {
-        background-color: #e0e0e0;
-    }
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
 }
 
 .warning-dialog {

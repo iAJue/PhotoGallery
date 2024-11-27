@@ -1,6 +1,7 @@
 <template>
     <div class="gallery">
-        <div v-for="(group, index) in groupedPhotos" :key="index" class="date-group">
+        <!-- 实际内容 -->
+        <div v-for="(group, date) in groupedPhotos" :key="date" class="date-group">
             <h3>{{ group.date }}</h3>
             <div class="photos">
                 <div v-for="(photo, idx) in group.items" :key="idx" class="photo-item"
@@ -12,9 +13,14 @@
                         <span class="duration">{{ formatDuration(parseFloat(photo.duration)) }}</span>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <!-- 骨架屏 -->
-                <div v-if="loading" class="photo-item skeleton">
+        <!-- 骨架屏 - -->
+        <div v-if="loading" class="date-group">
+            <div class="skeleton-text" style="width: 120px; height: 20px; margin-bottom: 16px;"></div>
+            <div class="photos">
+                <div v-for="i in 12" :key="i" class="photo-item skeleton">
                     <div class="skeleton-img"></div>
                 </div>
             </div>
@@ -279,7 +285,6 @@ onMounted(() => {
     }
 });
 
-
 </script>
 
 <style scoped>
@@ -313,7 +318,7 @@ onMounted(() => {
 
 .date-group h3 {
     margin-bottom: 16px;
-    color: #555;
+    color: var(--text-secondary);
 }
 
 .photos {
@@ -431,28 +436,33 @@ onMounted(() => {
 
 /* 骨架屏样式 */
 .skeleton {
-    background: #e0e0e0;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+.skeleton-text {
+    background: var(--skeleton-end);
+    border-radius: 4px;
+    animation: skeleton-loading 1.5s infinite;
+}
+
+.photo-item.skeleton {
+    aspect-ratio: 1;
 }
 
 .skeleton-img {
     width: 100%;
     height: 100%;
-    background: #ccc;
+    background: var(--skeleton-end);
     animation: skeleton-loading 1.5s infinite;
 }
 
 @keyframes skeleton-loading {
-    0% {
-        background-color: #e0e0e0;
-    }
-
-    50% {
-        background-color: #c0c0c0;
-    }
-
-    100% {
-        background-color: #e0e0e0;
-    }
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
 }
 
 .modal-overlay {

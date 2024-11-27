@@ -1,5 +1,5 @@
 <template>
-    <div class="">
+    <div class="container">
         <div class="gallery random">
             <div class="photo-item" v-for="(randomItem, index) in randomItems" :key="index"
                 @click="handleItemClick(randomItem, index)">
@@ -10,10 +10,12 @@
                     <div class="video-duration">{{ randomItem.duration }}</div>
                 </div>
             </div>
-            <!-- 骨架屏：加载中 -->
-            <div v-if="loading" class="photo-item skeleton">
-                <div class="skeleton-img"></div>
-            </div>
+            <!-- 骨架屏 -->
+            <template v-if="loading">
+                <div v-for="i in 12" :key="i" class="photo-item skeleton">
+                    <div class="skeleton-img"></div>
+                </div>
+            </template>
         </div>
 
         <!-- 图片预览模态框 -->
@@ -237,6 +239,16 @@ onBeforeUnmount(() => {
 
 
 <style scoped>
+.container{
+    padding-bottom: 30px;
+}
+.gallery.random {
+    display: grid;
+    gap: 24px;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    padding: 24px;
+    min-height: calc(100vh - 68px); /* 减去头部高度 */
+}
 
 .video-modal {
     position: fixed;
@@ -256,13 +268,6 @@ onBeforeUnmount(() => {
     height: 60%;
     border-radius: 8px;
     overflow: hidden;
-}
-
-.gallery.random {
-    display: grid;
-    gap: 24px;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    padding: 24px;
 }
 
 .photo-item {
@@ -293,28 +298,27 @@ onBeforeUnmount(() => {
 
 /* 骨架屏样式 */
 .skeleton {
-    background: #e0e0e0;
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+.photo-item.skeleton {
+    aspect-ratio: 1;
 }
 
 .skeleton-img {
     width: 100%;
     height: 100%;
-    background: #ccc;
+    background: var(--skeleton-end);
     animation: skeleton-loading 1.5s infinite;
 }
 
 @keyframes skeleton-loading {
-    0% {
-        background-color: #e0e0e0;
-    }
-
-    50% {
-        background-color: #c0c0c0;
-    }
-
-    100% {
-        background-color: #e0e0e0;
-    }
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
 }
 
 /* 模态框样式 */
