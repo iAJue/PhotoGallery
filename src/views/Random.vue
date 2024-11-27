@@ -55,7 +55,7 @@ const loading = ref(false);
 const page = ref(1);
 const currentMedia = ref(null); // 当前预览的图片或视频
 const dplayerInstance = ref(null); // DPlayer 实例
-const limit = ref(12);
+const limit = ref(15);
 const currentSrcIndex = ref(0); // 用于跟踪当前播放的分段索引
 const currentImage = ref(null); // 当前预览的图片
 const currentIndex = ref(null); // 当前图片索引
@@ -225,7 +225,22 @@ function formatDuration(duration) {
     return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 }
 
+function setLimitBasedOnScreenSize() {
+    const screenWidth = window.innerWidth;
+    if (screenWidth >= 2560) {
+        limit.value = 50; // 2K 屏幕
+    } else if (screenWidth >= 1200) {
+        limit.value = 40; // 大屏幕
+    } else if (screenWidth >= 768) {
+        limit.value = 15; // 中等屏幕
+    } else {
+        limit.value = 10; // 小屏幕
+    }
+}
+
 onMounted(() => {
+    setLimitBasedOnScreenSize();
+    window.addEventListener('resize', setLimitBasedOnScreenSize);
     loadMoreItems(); // 初次加载
 });
 
@@ -234,6 +249,7 @@ onBeforeUnmount(() => {
         dplayerInstance.value.destroy(); // 销毁播放器实例
         dplayerInstance.value = null;
     }
+    window.removeEventListener('resize', setLimitBasedOnScreenSize);
 });
 </script>
 
@@ -247,7 +263,6 @@ onBeforeUnmount(() => {
     gap: 24px;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     padding: 24px;
-    min-height: calc(100vh - 68px); /* 减去头部高度 */
 }
 
 .video-modal {

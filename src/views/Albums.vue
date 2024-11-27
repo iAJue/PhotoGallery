@@ -119,12 +119,13 @@ onMounted(() => {
 }
 
 .album {
-    background: white;
+    background: var(--bg-primary);
     border-radius: 16px;
     overflow: hidden;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     transition: all 0.3s ease;
     cursor: pointer;
+    height: 328px;
 }
 
 .album:hover {
@@ -157,12 +158,12 @@ onMounted(() => {
     font-weight: 600;
     font-size: 15px;
     margin-bottom: 4px;
-    color: #1e293b;
+    color: var(--text-secondary);
 }
 
 .album-count {
     font-size: 13px;
-    color: #64748b;
+    color: var(--text-secondary);
 }
 
 /* 骨架屏样式 */

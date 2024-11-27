@@ -9,6 +9,10 @@
   --modal-bg: #ffffff;
   --skeleton-start: #e0e0e0;
   --skeleton-end: #c0c0c0;
+  --primary-blue: #1a73e8;
+  --hover-blue: #155ab5;
+  --danger-red: #d9534f;
+  --hover-red: #c9302c;
 }
 
 .dark-mode {
@@ -22,6 +26,14 @@
   --modal-bg: #2d2d2d;
   --skeleton-start: #2d2d2d;
   --skeleton-end: #3d3d3d;
+  --primary-blue: #60a5fa;
+  --hover-blue: #3b82f6;
+  --danger-red: #ef4444;
+  --hover-red: #dc2626;
+}
+
+.dark-mode {
+  background-color: #2d2d2d;
 }
 
 /* Header 样式 */

@@ -31,6 +31,5 @@ body {
 
 .container {
     margin-top: 68px;
-    min-height: calc(100vh);
 }
 </style>
