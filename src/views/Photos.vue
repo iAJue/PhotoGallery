@@ -1,4 +1,4 @@
-<template>
+﻿<template>
     <div class="gallery">
         <!-- 实际内容 -->
         <div v-for="(group, date) in groupedPhotos" :key="date" class="date-group">
@@ -6,7 +6,7 @@
             <div class="photos">
                 <div v-for="(photo, idx) in group.items" :key="idx" class="photo-item"
                     @click="photo.isVideo ? playVideo(photo) : previewImage(photo, idx)">
-                    <img v-if="!photo.isVideo" :src="photo.src" :alt="photo.alt" />
+                    <img v-if="!photo.isVideo" :src="photo.src" :alt="photo.alt" loading="lazy" />
                     <div v-else class="video-thumbnail">
                         <div class="play-icon"><i class="fa-solid fa-play"></i></div>
                         <video :src="photo.src[0]" class="plyr" muted preload="metadata"></video>
@@ -16,7 +16,7 @@
             </div>
         </div>
 
-        <!-- 骨架屏 - -->
+        <!-- 骨架屏 -->
         <div v-if="loading" class="date-group">
             <div class="skeleton-text" style="width: 120px; height: 20px; margin-bottom: 16px;"></div>
             <div class="photos">
@@ -31,26 +31,24 @@
             <button @click="loadMore">加载更多 <i class="fas fa-chevron-down"></i></button>
         </div>
 
-        <div v-if="currentVideo" class="video-modal" @click.self="closeMedia">
-            <div class="dplayer-container"></div>
+        <div v-if="currentVideo" class="video-modal" @click.self="closeVideoPreview">
+            <div class="dplayer-container" ref="dplayerContainer"></div>
         </div>
 
         <!-- 图片预览模态框 -->
-        <div v-if="currentImage" class="image-modal">
-            <img :src="currentImage.src" :alt="currentImage.alt" @swipeleft="nextImage" @swiperight="previousImage" />
-
-            <!-- 左右导航按钮 -->
+        <div v-if="currentImage" class="image-modal" @click.self="closeImage">
+            <img :src="currentImage.src" :alt="currentImage.alt" @swipeleft="nextImage" @swiperight="previousImage"
+                loading="lazy" />
             <button class="nav-button left" @click.stop="previousImage">
                 <i class="fas fa-chevron-left"></i>
             </button>
             <button class="nav-button right" @click.stop="nextImage">
                 <i class="fas fa-chevron-right"></i>
             </button>
-
-            <span class="close-icon" @click="closeImage">✖</span>
+            <span class="close-icon" @click="closeImage">&times;</span>
         </div>
 
-        <!-- 密码输入框 -->
+        <!-- 密码输入 -->
         <div v-if="showPasswordPrompt" class="modal-overlay" @click="closePasswordPrompt">
             <div class="password-modal" @click.stop>
                 <h3>该文件夹受密码保护</h3>
@@ -62,113 +60,51 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import DPlayer from 'dplayer';
+import { formatDuration } from '../utils/format';
+import { useImagePreviewControls } from '../composables/useImagePreview';
+import { useModalKeydown } from '../composables/useModalKeydown';
+import { useDPlayerPreview } from '../composables/useDPlayerPreview';
+
 const route = useRoute();
 const folderId = ref(null);
 const showPasswordPrompt = ref(false);
-const password = ref("");
+const password = ref('');
 const groupedPhotos = ref([]);
 const currentVideo = ref(null);
 const currentImage = ref(null);
-const currentIndex = ref(null); 
+const currentIndex = ref(null);
 const loading = ref(false);
-const page = ref(1); 
-const plyrInstance = ref(null); 
-const currentSrcIndex = ref(0); 
-const searchQuery = ref("");
-const limit = ref(12); 
+const page = ref(1);
+const currentSrcIndex = ref(0);
+const searchQuery = ref('');
+const limit = ref(12);
 const hasMore = ref(true);
-const dplayerInstance = ref(null);
+const dplayerContainer = ref(null);
 
-watch(currentVideo, async () => {
-    if (currentVideo.value && currentVideo.value.isVideo) {
-        await nextTick();
-        initializeDPlayer();
-    }
+const { openImage, closeImage, nextImage, previousImage } = useImagePreviewControls({
+    currentImage,
+    currentIndex,
+    getItems: () => groupedPhotos.value.flatMap(group => group.items),
+    isImage: (item) => !item.isVideo,
 });
 
-function initializeDPlayer() {
-    if (dplayerInstance.value) {
-        dplayerInstance.value.destroy();
-    }
-
-    dplayerInstance.value = new DPlayer({
-        container: document.querySelector('.dplayer-container'),
-        video: {
-            url: currentVideo.value.src[currentSrcIndex.value],
-        },
-        autoplay: true,
-    });
-
-    const videoEl = dplayerInstance.value.video;
-    
-    videoEl.addEventListener('loadedmetadata', () => {
-        const videoWidth = videoEl.videoWidth;
-        const videoHeight = videoEl.videoHeight;
-        const maxWidth = window.innerWidth * 0.95;
-        const maxHeight = window.innerHeight * 0.95;
-
-        let displayWidth = videoWidth;
-        let displayHeight = videoHeight;
-
-        const widthRatio = maxWidth / videoWidth;
-        const heightRatio = maxHeight / videoHeight;
-        const ratio = Math.min(widthRatio, heightRatio);
-
-        displayWidth = videoWidth * ratio;
-        displayHeight = videoHeight * ratio;
-
-        const container = document.querySelector('.dplayer-container');
-        container.style.width = `${displayWidth}px`;
-        container.style.height = `${displayHeight}px`;
-    });
-
-    dplayerInstance.value.on('timeupdate', () => {
-        const currentTime = videoEl.currentTime;
-        const duration = videoEl.duration;
-        if (duration - currentTime < 20) preloadNextSegment();
-    });
-
-    dplayerInstance.value.on('ended', handleVideoEnd);
-}
-
-function preloadNextSegment() {
-    if (Array.isArray(currentVideo.value.src) && currentSrcIndex.value < currentVideo.value.src.length - 1) {
-        const nextSegment = document.createElement('video');
-        nextSegment.src = currentVideo.value.src[currentSrcIndex.value + 1];
-        nextSegment.preload = 'auto'; // 提前预加载下一段
-    }
-}
-onUnmounted(() => {
-    if (plyrInstance.value) {
-        plyrInstance.value.destroy();
-    }
-    window.removeEventListener('keydown', handleKeyDown);
+const { handleKeyDown } = useModalKeydown({
+    isImageOpen: () => !!currentImage.value,
+    isVideoOpen: () => !!currentVideo.value,
+    closeImage,
+    closeVideo: () => closeVideoPreview(),
+    nextImage,
+    previousImage,
 });
-function handleVideoEnd() {
-    // 如果还有下一段视频
-    if (Array.isArray(currentVideo.value.src) && currentSrcIndex.value < currentVideo.value.src.length - 1) {
-        currentSrcIndex.value += 1; // 切换到下一个地址
-        dplayerInstance.value.switchVideo({
-            url: currentVideo.value.src[currentSrcIndex.value],
-        });
-        dplayerInstance.value.play(); // 自动播放下一段视频
-    } else {
-        // 如果所有片段播放完毕
-        currentSrcIndex.value = 0; // 重置索引
-        dplayerInstance.value.pause(); // 暂停播放器（如果需要）
-    }
-}
 
-function closeMedia() {
-    if (dplayerInstance.value) {
-        dplayerInstance.value.destroy();
-    }
-    currentVideo.value = null;
-    currentSrcIndex.value = 0;
-}
+const { openMedia: openVideoPreview, closeMedia: closeVideoPreview } = useDPlayerPreview({
+    containerRef: dplayerContainer,
+    currentMedia: currentVideo,
+    currentSrcIndex,
+});
+
 async function fetchPhotos(page) {
     loading.value = true;
     try {
@@ -196,72 +132,29 @@ async function fetchPhotos(page) {
         }));
         groupedPhotos.value = [...groupedPhotos.value, ...newPhotos];
     } catch (error) {
-        console.error("获取照片数据失败:", error);
+        console.error('获取照片数据失败:', error);
     } finally {
         loading.value = false;
     }
 }
-// 加载更多方法
+
 function loadMore() {
     if (!loading.value && hasMore.value) {
-        page.value += 1; // 增加页码
-        fetchPhotos(page.value); // 加载下一页数据
+        page.value += 1;
+        fetchPhotos(page.value);
     }
 }
 
 function playVideo(photo) {
     if (photo.isVideo) {
-        currentVideo.value = photo;
+        openVideoPreview(photo);
     }
 }
 
-function previewImage(photo, index) {
-    currentImage.value = photo;
-    currentIndex.value = groupedPhotos.value.flatMap(group => group.items).findIndex(item => item.src === photo.src);
-}
-
-function closeImage() {
-    currentImage.value = null;
-    currentIndex.value = null;
-}
-
-function handleKeyDown(event) {
-    if (event.key === 'Escape' && currentImage.value) {
-        closeImage();
-    }
-}
-
-function nextImage() {
-    if (currentIndex.value !== null) {
-        const allItems = groupedPhotos.value.flatMap(group => group.items); // 展平所有图片和视频
-        let nextIndex = (currentIndex.value + 1) % allItems.length; // 计算下一项索引
-        // 跳过视频
-        while (allItems[nextIndex].isVideo) {
-            nextIndex = (nextIndex + 1) % allItems.length;
-        }
-        currentIndex.value = nextIndex; // 更新索引
-        currentImage.value = allItems[currentIndex.value]; // 更新当前图片
-    }
-}
-
-function previousImage() {
-    if (currentIndex.value !== null) {
-        const allItems = groupedPhotos.value.flatMap(group => group.items); // 展平所有图片和视频
-        let prevIndex = (currentIndex.value - 1 + allItems.length) % allItems.length; // 计算上一项索引
-        // 跳过视频
-        while (allItems[prevIndex].isVideo) {
-            prevIndex = (prevIndex - 1 + allItems.length) % allItems.length;
-        }
-        currentIndex.value = prevIndex; // 更新索引
-        currentImage.value = allItems[currentIndex.value]; // 更新当前图片
-    }
-}
-
-function formatDuration(duration) {
-    const totalSeconds = Math.floor(duration);
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+function previewImage(photo) {
+    const all = groupedPhotos.value.flatMap(group => group.items);
+    const idx = all.findIndex(item => item.src === photo.src);
+    if (idx !== -1) openImage(idx);
 }
 
 function submitPassword() {
@@ -271,14 +164,18 @@ function submitPassword() {
         alert('请输入密码');
     }
 }
+
+function closePasswordPrompt() { showPasswordPrompt.value = false; }
+
 watch(
     () => route.query.search,
     (newSearch) => {
-        searchQuery.value = newSearch;
+        searchQuery.value = newSearch || '';
         groupedPhotos.value = [];
         fetchPhotos(page.value);
     }
 );
+
 function setLimitBasedOnScreenSize() {
     const screenWidth = window.innerWidth;
     if (screenWidth >= 2560) {
@@ -291,29 +188,30 @@ function setLimitBasedOnScreenSize() {
         limit.value = 10; // 小屏幕
     }
 }
+
 onMounted(() => {
     const folderParam = route.query.folder_id;
     const isPassword = route.query.ispassword === 'true';
     searchQuery.value = route.query.search || '';
     setLimitBasedOnScreenSize();
-    if (folderParam) {
-        folderId.value = folderParam;
-    }
+    if (folderParam) folderId.value = folderParam;
     if (isPassword) {
         showPasswordPrompt.value = true;
     } else {
         fetchPhotos(page.value);
     }
-
     window.addEventListener('keydown', handleKeyDown);
+});
+
+onUnmounted(() => {
+    window.removeEventListener('keydown', handleKeyDown);
 });
 </script>
 
 <style scoped>
-
 .video-modal {
     position: fixed;
-    inset: 0; /* top/right/bottom/left = 0 */
+    inset: 0;
     background: rgba(0, 0, 0, 0.8);
     display: flex;
     justify-content: center;
@@ -427,7 +325,6 @@ onMounted(() => {
     border-radius: 8px;
 }
 
-/* 导航按钮 */
 .nav-button {
     position: absolute;
     top: 50%;
@@ -460,7 +357,6 @@ onMounted(() => {
     cursor: pointer;
 }
 
-/* 骨架屏样式 */
 .skeleton {
     background: var(--bg-secondary);
     border-radius: 8px;
@@ -486,9 +382,17 @@ onMounted(() => {
 }
 
 @keyframes skeleton-loading {
-    0% { opacity: 0.6; }
-    50% { opacity: 1; }
-    100% { opacity: 0.6; }
+    0% {
+        opacity: 0.6;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0.6;
+    }
 }
 
 .modal-overlay {
@@ -544,13 +448,18 @@ onMounted(() => {
     border-radius: 8px;
     overflow: hidden;
 }
+
 .responsive-video {
     width: auto;
     height: auto;
 }
-.video-thumbnail video{
+
+.video-thumbnail video {
     width: 100%;
     height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
 }
 
 .load-more {

@@ -46,6 +46,7 @@ import { useRouter } from 'vue-router';
 defineProps({
     isDarkMode: Boolean
 });
+defineEmits(['toggle-dark-mode']);
 
 const searchQuery = ref(''); 
 const router = useRouter();
