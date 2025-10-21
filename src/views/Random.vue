@@ -75,6 +75,12 @@ function closeImage() {
     currentIndex.value = null;
 }
 
+function handleKeyDown(event) {
+    if (event.key === 'Escape' && currentImage.value) {
+        closeImage();
+    }
+}
+
 function nextImage() {
     if (currentIndex.value !== null) {
         let nextIndex = (currentIndex.value + 1) % randomItems.value.length;
@@ -113,7 +119,34 @@ function initDPlayer() {
         autoplay: true,
     });
 
+    dplayerInstance.value.on('loadedmetadata', adjustVideoSize);
     dplayerInstance.value.on('timeupdate', handleTimeUpdate);
+}
+
+function adjustVideoSize() {
+    const videoEl = dplayerInstance.value?.video;
+    const container = document.querySelector('.dplayer-container');
+    if (!videoEl || !container) return;
+
+    const { videoWidth, videoHeight } = videoEl;
+    const aspectRatio = videoWidth / videoHeight;
+    const maxWidth = window.innerWidth * 0.9;
+    const maxHeight = window.innerHeight * 0.9;
+
+    // 根据视频比例和窗口大小计算自适应宽高
+    let newWidth, newHeight;
+    if (aspectRatio > 1) {
+        // 横屏
+        newWidth = Math.min(maxWidth, maxHeight * aspectRatio);
+        newHeight = newWidth / aspectRatio;
+    } else {
+        // 竖屏
+        newHeight = Math.min(maxHeight, maxWidth / aspectRatio);
+        newWidth = newHeight * aspectRatio;
+    }
+
+    container.style.width = `${newWidth}px`;
+    container.style.height = `${newHeight}px`;
 }
 
 // 监听播放时间更新
@@ -241,10 +274,12 @@ function setLimitBasedOnScreenSize() {
 onMounted(() => {
     setLimitBasedOnScreenSize();
     window.addEventListener('resize', setLimitBasedOnScreenSize);
+    window.addEventListener('keydown', handleKeyDown); 
     loadMoreItems(); // 初次加载
 });
 
 onBeforeUnmount(() => {
+    window.removeEventListener('keydown', handleKeyDown);
     if (dplayerInstance.value) {
         dplayerInstance.value.destroy(); // 销毁播放器实例
         dplayerInstance.value = null;
@@ -279,10 +314,16 @@ onBeforeUnmount(() => {
 }
 
 .dplayer-container {
-    width: 80%;
-    height: 60%;
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+    width: auto;
+    height: auto;
     border-radius: 8px;
     overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .photo-item {
@@ -376,6 +417,9 @@ onBeforeUnmount(() => {
 .video-overlay video {
     width: 100%;
     height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
 }
 
 .play-icon {

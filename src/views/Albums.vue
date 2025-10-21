@@ -20,6 +20,7 @@
                     <div v-if="album.attribute != 0" class="blur-overlay"><i class="fa-solid fa-eye-slash"></i> 限制级</div>
                     <img :src="album.cover" :alt="album.title" v-if="isImage(album.cover)" />
                     <div v-else class="video-overlay">
+                        <video class="cover-video" :src="(album.cover || '').split(/\r?\n/)[0]"></video>
                         <div class="play-icon"><i class="fa-solid fa-play"></i></div>
                     </div>
                 </div>
@@ -89,7 +90,7 @@ function handleAlbumClick(album) {
     }
 }
 function isImage(src) {
-    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
+    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'tiff', 'svg'];
     const extension = src.split('.').pop().toLowerCase();
     return imageExtensions.includes(extension);
 }
@@ -281,6 +282,14 @@ onMounted(() => {
     position: relative;
     height: 100%;
     width: 100%;
+}
+
+.cover-video{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
 }
 
 .play-icon {

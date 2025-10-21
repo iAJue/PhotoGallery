@@ -46,10 +46,16 @@ https://photo.moejue.cn
    npm run build
    ```
 
+5. nginx伪静态
+    ```bash
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+    ```
 
 ## 后端接口
 仅供参考
-https://github.com/iAJue/wasteCode/tree/main/photo
+https://github.com/OopsiLab/photo/blob/main/api.php
 
 
 ## 返回数据格式

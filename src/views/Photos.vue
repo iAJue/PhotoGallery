@@ -102,20 +102,38 @@ function initializeDPlayer() {
         autoplay: true,
     });
 
-    // 监听时间更新事件，提前加载下一个片段
-    dplayerInstance.value.on('timeupdate', () => {
-        const currentTime = dplayerInstance.value.video.currentTime;
-        const duration = dplayerInstance.value.video.duration;
+    const videoEl = dplayerInstance.value.video;
+    
+    videoEl.addEventListener('loadedmetadata', () => {
+        const videoWidth = videoEl.videoWidth;
+        const videoHeight = videoEl.videoHeight;
+        const maxWidth = window.innerWidth * 0.95;
+        const maxHeight = window.innerHeight * 0.95;
 
-        // 如果播放接近尾声，预加载下一段
-        if (duration - currentTime < 20) {
-            preloadNextSegment();
-        }
+        let displayWidth = videoWidth;
+        let displayHeight = videoHeight;
+
+        const widthRatio = maxWidth / videoWidth;
+        const heightRatio = maxHeight / videoHeight;
+        const ratio = Math.min(widthRatio, heightRatio);
+
+        displayWidth = videoWidth * ratio;
+        displayHeight = videoHeight * ratio;
+
+        const container = document.querySelector('.dplayer-container');
+        container.style.width = `${displayWidth}px`;
+        container.style.height = `${displayHeight}px`;
     });
 
-    // 监听播放结束事件，切换到下一段
+    dplayerInstance.value.on('timeupdate', () => {
+        const currentTime = videoEl.currentTime;
+        const duration = videoEl.duration;
+        if (duration - currentTime < 20) preloadNextSegment();
+    });
+
     dplayerInstance.value.on('ended', handleVideoEnd);
 }
+
 function preloadNextSegment() {
     if (Array.isArray(currentVideo.value.src) && currentSrcIndex.value < currentVideo.value.src.length - 1) {
         const nextSegment = document.createElement('video');
@@ -127,6 +145,7 @@ onUnmounted(() => {
     if (plyrInstance.value) {
         plyrInstance.value.destroy();
     }
+    window.removeEventListener('keydown', handleKeyDown);
 });
 function handleVideoEnd() {
     // 如果还有下一段视频
@@ -206,6 +225,12 @@ function closeImage() {
     currentIndex.value = null;
 }
 
+function handleKeyDown(event) {
+    if (event.key === 'Escape' && currentImage.value) {
+        closeImage();
+    }
+}
+
 function nextImage() {
     if (currentIndex.value !== null) {
         const allItems = groupedPhotos.value.flatMap(group => group.items); // 展平所有图片和视频
@@ -230,10 +255,6 @@ function previousImage() {
         currentIndex.value = prevIndex; // 更新索引
         currentImage.value = allItems[currentIndex.value]; // 更新当前图片
     }
-}
-
-function closeVideo() {
-    currentVideo.value = null;
 }
 
 function formatDuration(duration) {
@@ -283,31 +304,36 @@ onMounted(() => {
     } else {
         fetchPhotos(page.value);
     }
-});
 
+    window.addEventListener('keydown', handleKeyDown);
+});
 </script>
 
 <style scoped>
 
 .video-modal {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    inset: 0; /* top/right/bottom/left = 0 */
     background: rgba(0, 0, 0, 0.8);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    padding: 10px;
 }
 
 .dplayer-container {
-    width: 80%;
-    height: 60%;
+    width: auto;
+    height: auto;
+    max-width: 95vw;
+    max-height: 95vh;
     border-radius: 8px;
     overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
+
 .gallery {
     padding: 16px;
 }

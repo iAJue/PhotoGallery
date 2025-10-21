@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "dplayer": "^1.27.1",
+    "dplayer": "^1.27.0",
     "vue": "^3.5.12",
     "vue-router": "^4.4.5"
   },
