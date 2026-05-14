@@ -36,8 +36,8 @@ export function useDPlayerPreview(params) {
 
     const { videoWidth, videoHeight } = videoEl;
     const aspectRatio = videoWidth / videoHeight;
-    const maxWidth = window.innerWidth * 0.95;
-    const maxHeight = window.innerHeight * 0.95;
+    const maxWidth = window.innerWidth * 0.85;
+    const maxHeight = window.innerHeight * 0.85;
 
     let newWidth, newHeight;
     if (aspectRatio > 1) {

@@ -4,12 +4,14 @@ import { createRouter, createWebHistory } from 'vue-router';
 import Photos from './views/Photos.vue';
 import Albums from './views/Albums.vue';
 import Random from './views/Random.vue';
+import Short from './views/Short.vue';
 
 const routes = [
   { path: '/', redirect: '/photos' },
   { path: '/photos', name: 'Photos', component: Photos },
   { path: '/albums', name: 'Albums', component: Albums },
   { path: '/random', name: 'Random', component: Random },
+  { path: '/short', name: 'Short', component: Short },
 ];
 
 const router = createRouter({

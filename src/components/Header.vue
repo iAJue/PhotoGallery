@@ -7,6 +7,7 @@
             <router-link to="/photos" class="tab" :class="{ active: $route.path === '/photos' }">照片</router-link>
             <router-link to="/albums" class="tab" :class="{ active: $route.path === '/albums' }">相册</router-link>
             <router-link to="/random" class="tab" :class="{ active: $route.path === '/random' }">随机</router-link>
+            <router-link to="/short" class="tab" :class="{ active: $route.path === '/short' }">Short</router-link>
         </div>
         <div class="more-icon" @click="toggleDropdown" @mouseover="showDropdown = true"
             @mouseleave="showDropdown = false">
@@ -117,7 +118,8 @@ function toggleAboutModal() {
     flex: 1;
     display: flex;
     justify-content: center;
-    gap: 40px;
+    gap: 32px;
+    min-width: 0;
 }
 
 .tab {
@@ -262,12 +264,24 @@ function toggleAboutModal() {
 /* 响应式布局 */
 @media (max-width: 768px) {
     .tabs {
-        gap: 20px;
+        gap: 12px;
         font-size: 14px;
+        justify-content: flex-start;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .tabs::-webkit-scrollbar {
+        display: none;
     }
 
     .header {
         padding: 0 16px;
+    }
+
+    .tab {
+        padding: 10px 12px;
+        white-space: nowrap;
     }
 
     .search-input {
