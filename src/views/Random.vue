@@ -21,7 +21,7 @@
         <!-- 图片预览模态框 -->
         <div v-if="currentImage" class="image-modal" @click.self="closeImage">
             <img :src="currentImage.src" :alt="currentImage.alt" @swipeleft="nextImage" @swiperight="previousImage"
-                loading="lazy" />
+                loading="lazy" decoding="async" />
             <button class="nav-button left" @click.stop="previousImage">
                 <i class="fas fa-chevron-left"></i>
             </button>

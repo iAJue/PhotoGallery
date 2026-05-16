@@ -17,8 +17,10 @@
         <template v-else>
             <div class="album" v-for="(album, index) in albums" :key="index" @click="handleAlbumClick(album)">
                 <div class="album-cover">
-                    <div v-if="album.attribute != 0" class="blur-overlay"><i class="fa-solid fa-eye-slash"></i> 限制级</div>
-                    <img :src="album.cover" :alt="album.title" v-if="isImage(album.cover)" />
+                    <div v-if="album.attribute != 0" class="blur-overlay"><i class="fa-solid fa-eye-slash"></i> 限制级
+                    </div>
+                    <img :src="album.cover" loading="lazy" decoding="async" :alt="album.title"
+                        v-if="isImage(album.cover)" />
                     <div v-else class="video-overlay">
                         <video class="cover-video" :src="(album.cover || '').split(/\r?\n/)[0]"></video>
                         <div class="play-icon"><i class="fa-solid fa-play"></i></div>
@@ -200,9 +202,17 @@ onMounted(() => {
 }
 
 @keyframes skeleton-loading {
-    0% { opacity: 0.6; }
-    50% { opacity: 1; }
-    100% { opacity: 0.6; }
+    0% {
+        opacity: 0.6;
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0.6;
+    }
 }
 
 .warning-dialog {
@@ -284,7 +294,7 @@ onMounted(() => {
     width: 100%;
 }
 
-.cover-video{
+.cover-video {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -306,7 +316,7 @@ onMounted(() => {
 
 
 
-.blur-overlay{
+.blur-overlay {
     position: absolute;
     width: 100%;
     height: 100%;
@@ -317,6 +327,4 @@ onMounted(() => {
     padding-top: 50%;
     color: #ff0c0c;
 }
-
-
 </style>
