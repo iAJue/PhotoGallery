@@ -34,7 +34,7 @@ const groupedPhotos = ref([]);
 const loading = ref(false);
 const page = ref(1);
 const searchQuery = ref('');
-const limit = 12;
+const limit = 26
 const hasMore = ref(true);
 
 const galleryInstanceKey = computed(() => `${folderId.value || 'all'}::${searchQuery.value || ''}`);

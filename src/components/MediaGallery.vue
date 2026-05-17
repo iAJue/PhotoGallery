@@ -205,7 +205,7 @@ onUnmounted(() => {
 .media-gallery {
     --card-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
     --card-shadow-hover: 0 24px 48px rgba(15, 23, 42, 0.16);
-    max-width: 1280px;
+    /* max-width: 1280px; */
     margin: 0 auto;
     color: var(--text-primary);
 }
@@ -255,7 +255,7 @@ onUnmounted(() => {
 
 .photo-item:nth-child(7n + 1) {
     grid-column: span 2;
-    grid-row: span 16;
+    grid-row: span 18;
 }
 
 .photo-item:nth-child(7n + 4) {
