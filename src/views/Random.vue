@@ -15,13 +15,13 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted, onBeforeUnmount } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import MediaGallery from '../components/MediaGallery.vue';
 
 const randomItems = ref([]);
 const loading = ref(false);
 const page = ref(1);
-const limit = ref(15);
+const limit = 12;
 const hasMore = ref(true);
 
 const randomGroups = computed(() => [{ items: randomItems.value }]);
@@ -29,7 +29,7 @@ const randomGroups = computed(() => [{ items: randomItems.value }]);
 async function shuffleGallery(targetPage) {
     loading.value = true;
     try {
-        const response = await fetch(`https://photo.moejue.cn/api/?action=random&page=${targetPage}&limit=${limit.value}`);
+        const response = await fetch(`https://photo.moejue.cn/api/?action=random&page=${targetPage}&limit=${limit}`);
         if (!response.ok) throw new Error('网络请求失败');
         const data = await response.json();
         if (data.length === 0) {
@@ -58,27 +58,8 @@ async function loadMoreItems() {
     page.value += 1;
 }
 
-function setLimitBasedOnScreenSize() {
-    const screenWidth = window.innerWidth;
-    if (screenWidth >= 2560) {
-        limit.value = 50;
-    } else if (screenWidth >= 1200) {
-        limit.value = 40;
-    } else if (screenWidth >= 768) {
-        limit.value = 15;
-    } else {
-        limit.value = 10;
-    }
-}
-
 onMounted(() => {
-    setLimitBasedOnScreenSize();
-    window.addEventListener('resize', setLimitBasedOnScreenSize);
     loadMoreItems();
-});
-
-onBeforeUnmount(() => {
-    window.removeEventListener('resize', setLimitBasedOnScreenSize);
 });
 </script>
 

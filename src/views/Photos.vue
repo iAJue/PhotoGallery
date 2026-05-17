@@ -34,7 +34,7 @@ const groupedPhotos = ref([]);
 const loading = ref(false);
 const page = ref(1);
 const searchQuery = ref('');
-const limit = ref(12);
+const limit = 12;
 const hasMore = ref(true);
 
 const galleryInstanceKey = computed(() => `${folderId.value || 'all'}::${searchQuery.value || ''}`);
@@ -42,7 +42,7 @@ const galleryInstanceKey = computed(() => `${folderId.value || 'all'}::${searchQ
 async function fetchPhotos(targetPage) {
     loading.value = true;
     try {
-        const response = await fetch(`https://photo.moejue.cn/api/?action=photos&page=${targetPage}&limit=${limit.value}&folder_id=${folderId.value}&password=${password.value}&search=${searchQuery.value}`);
+        const response = await fetch(`https://photo.moejue.cn/api/?action=photos&page=${targetPage}&limit=${limit}&folder_id=${folderId.value}&password=${password.value}&search=${searchQuery.value}`);
         if (!response.ok) throw new Error('网络请求失败');
         const data = await response.json();
         if (data.error) {
@@ -103,19 +103,6 @@ function syncRouteState() {
     searchQuery.value = route.query.search || '';
 }
 
-function setLimitBasedOnScreenSize() {
-    const screenWidth = window.innerWidth;
-    if (screenWidth >= 2560) {
-        limit.value = 50;
-    } else if (screenWidth >= 1200) {
-        limit.value = 40;
-    } else if (screenWidth >= 768) {
-        limit.value = 15;
-    } else {
-        limit.value = 10;
-    }
-}
-
 watch(
     () => [route.query.folder_id, route.query.search, route.query.ispassword],
     ([newFolderId, newSearch, newIsPassword], [oldFolderId, oldSearch, oldIsPassword]) => {
@@ -140,7 +127,6 @@ watch(
 
 onMounted(() => {
     syncRouteState();
-    setLimitBasedOnScreenSize();
 
     if (route.query.ispassword === 'true') {
         showPasswordPrompt.value = true;
@@ -152,7 +138,7 @@ onMounted(() => {
 
 <style scoped>
 .photos-page {
-    padding: 96px 24px 48px;
+    padding: 50px 24px 48px;
 }
 
 .modal-overlay {
@@ -234,7 +220,7 @@ onMounted(() => {
 
 @media (max-width: 768px) {
     .photos-page {
-        padding: 84px 14px 40px;
+        padding: 45px 14px 40px;
     }
 
     .password-modal {
