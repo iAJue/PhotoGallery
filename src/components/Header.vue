@@ -24,10 +24,18 @@
             </div>
         </div>
     </div>
-    <div v-if="showSearchModal" class="search-modal" @click.self="toggleSearchModal">
-        <input type="text" class="search-input" placeholder="搜索照片或相册..." v-model="searchQuery"
-            @keyup.enter="navigateToPhotos" ref="searchInput"/>
-    </div>
+    <transition name="search-modal-fade">
+        <div v-if="showSearchModal" class="search-modal" @click.self="toggleSearchModal">
+            <input
+                type="text"
+                class="search-input"
+                placeholder="搜索照片或相册..."
+                v-model="searchQuery"
+                @keyup.enter="navigateToPhotos"
+                ref="searchInput"
+            />
+        </div>
+    </transition>
     <div v-if="showAboutModal" class="about-modal" @click.self="toggleAboutModal">
         <div class="about-content">
             <h2>关于我们</h2>
@@ -186,6 +194,7 @@ function toggleAboutModal() {
     left: 0;
     width: 100%;
     height: 100%;
+    background: rgba(255, 255, 255, 0.18);
     backdrop-filter: blur(10px);
     display: flex;
     justify-content: center;
@@ -205,6 +214,35 @@ function toggleAboutModal() {
     color: #1e293b;
     transition: all 0.3s ease;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.search-modal-fade-enter-active,
+.search-modal-fade-leave-active {
+    transition: opacity 0.28s ease, backdrop-filter 0.28s ease;
+}
+
+.search-modal-fade-enter-active .search-input,
+.search-modal-fade-leave-active .search-input {
+    transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.24s ease, box-shadow 0.32s ease;
+}
+
+.search-modal-fade-enter-from,
+.search-modal-fade-leave-to {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+}
+
+.search-modal-fade-enter-from .search-input,
+.search-modal-fade-leave-to .search-input {
+    opacity: 0;
+    transform: translateY(-18px) scale(0.96);
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+}
+
+.search-modal-fade-enter-to .search-input,
+.search-modal-fade-leave-from .search-input {
+    opacity: 1;
+    transform: translateY(0) scale(1);
 }
 
 .search-input:focus {
