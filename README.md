@@ -10,6 +10,7 @@ https://photo.moejue.cn
 ![image](./public/images/1.png)
 ![image](./public/images/2.png)
 ![image](./public/images/3.png)
+![image](./public/images/4.png)
 
 
 ## 特性

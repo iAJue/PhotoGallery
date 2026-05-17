@@ -15,8 +15,8 @@
   --hover-red: #c9302c;
 }
 
-.dark-mode {
-  --bg-primary: #1a1a1a;
+[data-theme="dark"] {
+  --bg-primary: #2D2D2D;
   --bg-secondary: #2d2d2d;
   --text-primary: #ffffff;
   --text-secondary: #a0aec0;
@@ -32,96 +32,211 @@
   --hover-red: #dc2626;
 }
 
-.dark-mode {
-  background-color: #2d2d2d;
+/* 页面基础 */
+
+html,
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 /* Header 样式 */
-.dark-mode .header {
-  background: var(--header-bg);
-  box-shadow: 0 1px 3px var(--border-color);
+
+.header {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.88),
+      rgba(255, 255, 255, 0.7)
+    ),
+    var(--header-bg);
+
+  transition: all 0.3s ease;
 }
 
-.dark-mode .search-icon,
-.dark-mode .more-icon {
+[data-theme="dark"] .header {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(26, 26, 26, 0.88),
+      rgba(45, 45, 45, 0.7)
+    ),
+    var(--header-bg);
+
+  border-color: rgba(255, 255, 255, 0.12);
+
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.32);
+}
+
+/* 图标 */
+
+.search-icon,
+.more-icon {
+  transition: all 0.3s ease;
+}
+
+[data-theme="dark"] .search-icon,
+[data-theme="dark"] .more-icon {
   color: var(--text-primary);
+
+  background: rgba(255, 255, 255, 0.06);
+
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
-.dark-mode .tab {
+[data-theme="dark"] .search-icon:hover,
+[data-theme="dark"] .more-icon:hover {
+  background: rgba(96, 165, 250, 0.16);
+
+  color: var(--primary-blue);
+
+  box-shadow:
+    0 10px 20px rgba(59, 130, 246, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* Tabs */
+
+[data-theme="dark"] .tabs {
+  background: rgba(255, 255, 255, 0.04);
+
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .tab {
   color: var(--text-secondary);
 }
 
-.dark-mode .dropdown-menu {
-  background: var(--bg-secondary);
+[data-theme="dark"] .tab:hover {
+  color: var(--text-primary);
+
+  background: rgba(255, 255, 255, 0.08);
 }
 
-.dark-mode .dropdown-menu a,
-.dark-mode .dropdown-menu div {
+/* 下拉菜单 */
+
+[data-theme="dark"] .dropdown-menu {
+  background: rgba(26, 26, 26, 0.86);
+
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .dropdown-menu a,
+[data-theme="dark"] .dropdown-menu div {
   color: var(--text-primary);
 }
 
-/* 相册样式 */
-.dark-mode .album {
+[data-theme="dark"] .dropdown-menu a:hover,
+[data-theme="dark"] .dropdown-menu div:hover {
+  background: rgba(96, 165, 250, 0.12);
+
+  color: var(--primary-blue);
+}
+
+/* 搜索 */
+
+[data-theme="dark"] .search-modal {
+  background: rgba(15, 23, 42, 0.34);
+}
+
+[data-theme="dark"] .search-input {
+  background: rgba(45, 45, 45, 0.84);
+
+  color: var(--text-primary);
+
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .search-input:focus {
+  background: rgba(45, 45, 45, 0.96);
+}
+
+/* About */
+
+[data-theme="dark"] .about-modal {
+  background: rgba(0, 0, 0, 0.78);
+}
+
+/* 相册 */
+
+[data-theme="dark"] .album {
   background: var(--bg-secondary);
+
   box-shadow: 0 2px 8px var(--shadow-color);
 }
 
-.dark-mode .album-title {
+[data-theme="dark"] .album-title {
   color: var(--text-primary);
 }
 
-.dark-mode .album-count {
+[data-theme="dark"] .album-count {
   color: var(--text-secondary);
 }
 
-/* 照片样式 */
-.dark-mode .date-group h3 {
+/* 照片 */
+
+[data-theme="dark"] .date-group h3 {
   color: var(--text-secondary);
 }
 
-.dark-mode .photo-item {
+[data-theme="dark"] .photo-item {
   box-shadow: 0 2px 8px var(--shadow-color);
 }
 
-/* 模态框样式 */
-.dark-mode .password-modal,
-.dark-mode .about-content {
+/* 模态框 */
+
+[data-theme="dark"] .password-modal,
+[data-theme="dark"] .about-content {
   background: var(--modal-bg);
+
   color: var(--text-primary);
 }
 
-.dark-mode .password-modal input {
+[data-theme="dark"] .password-modal input {
   background: var(--bg-secondary);
+
   color: var(--text-primary);
+
   border-color: var(--border-color);
 }
 
-/* 骨架屏样式 */
-.dark-mode .skeleton {
+/* 骨架屏 */
+
+[data-theme="dark"] .skeleton {
   background: var(--skeleton-start);
 }
 
-.dark-mode .skeleton-img {
+[data-theme="dark"] .skeleton-img {
   background: var(--skeleton-end);
 }
 
 @keyframes dark-skeleton-loading {
-  0% { background-color: var(--skeleton-start); }
-  50% { background-color: var(--skeleton-end); }
-  100% { background-color: var(--skeleton-start); }
+  0% {
+    background-color: var(--skeleton-start);
+  }
+
+  50% {
+    background-color: var(--skeleton-end);
+  }
+
+  100% {
+    background-color: var(--skeleton-start);
+  }
 }
 
-.dark-mode .skeleton-img {
+[data-theme="dark"] .skeleton-img {
   animation: dark-skeleton-loading 1.5s infinite;
 }
 
-.dark-mode .container,
-.dark-mode .gallery {
+/* 页面 */
+
+[data-theme="dark"] .container,
+[data-theme="dark"] .gallery {
   background-color: var(--bg-secondary);
 }
 
-.dark-mode .gallery.random,
-.dark-mode .gallery.albums,
-.dark-mode .gallery.photos {
+[data-theme="dark"] .gallery.random,
+[data-theme="dark"] .gallery.albums,
+[data-theme="dark"] .gallery.photos {
   background-color: var(--bg-secondary);
-} 
+}
