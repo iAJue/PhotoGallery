@@ -112,7 +112,7 @@ const profile = {
     handle: 'MoeJue',
     bio: '欢迎来到阿珏酱的短视频世界！这里是我的个人主页，分享我喜爱的Short Videos。',
     avatar: 'https://q2.qlogo.cn/headimg_dl?dst_uin=1638211921&spec=640',
-    banner: '/images/3.png',
+    banner: '/images/GhuZtsjbcAASOl7.jpg',
     stats: [
         { label: '作品', value: '260' },
         { label: '关注', value: '186' },
@@ -369,6 +369,8 @@ onBeforeUnmount(() => {
 }
 
 .profile-hero {
+    margin-top: -68px;
+    padding-top: 68px;
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;

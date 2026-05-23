@@ -467,24 +467,21 @@ watch(() => route.path, async () => {
         top: 12px;
         width: calc(100vw - 20px);
         padding: 8px 10px;
-        gap: 8px;
+        gap: 6px;
     }
 
     .tabs {
-        gap: 4px;
-        justify-content: flex-start;
-        overflow-x: auto;
-        scrollbar-width: none;
-    }
-
-    .tabs::-webkit-scrollbar {
-        display: none;
+        gap: 2px;
+        justify-content: stretch;
+        overflow: hidden;
+        padding: 3px;
     }
 
     .tab {
-        padding: 10px 13px;
-        font-size: 14px;
-        white-space: nowrap;
+        flex: 1 1 0;
+        min-width: 0;
+        padding: 10px 8px;
+        font-size: 13px;
     }
 
     .search-input {
@@ -494,14 +491,37 @@ watch(() => route.path, async () => {
 
     .search-icon,
     .more-icon {
-        width: 42px;
-        height: 42px;
-        font-size: 15px;
+        width: 40px;
+        height: 40px;
+        font-size: 14px;
     }
 
     .dropdown-menu {
         top: calc(100% + 10px);
         width: 172px;
+    }
+}
+
+@media (max-width: 420px) {
+    .header {
+        width: calc(100vw - 16px);
+        padding: 7px 8px;
+        gap: 5px;
+    }
+
+    .tabs {
+        gap: 1px;
+    }
+
+    .tab {
+        padding: 9px 6px;
+        font-size: 12px;
+    }
+
+    .search-icon,
+    .more-icon {
+        width: 38px;
+        height: 38px;
     }
 }
 </style>
